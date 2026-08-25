@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeDrive | Kimlik Doğrulama</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        // ÇEVİRİ VE DİL YÖNETİMİ
+        const translations = {
+            'tr': {
+                'login_title': "HomeDrive'a Giriş Yap", 'login_desc': 'Ağ erişimi için kimliğinizi doğrulayın',
+                'username': 'Kullanıcı Adı', 'password': 'Parola', 'remember_me': 'Oturumu açık tut',
+                'login_btn': 'Giriş Yap', 'lang_btn': 'TR',
+                'login_error': 'Kullanıcı adı veya parola hatalı!'
+            },
+            'en': {
+                'login_title': "Log in to HomeDrive", 'login_desc': 'Authenticate for network access',
+                'username': 'Username', 'password': 'Password', 'remember_me': 'Keep me logged in',
+                'login_btn': 'Log In', 'lang_btn': 'EN',
+                'login_error': 'Invalid username or password!'
+            }
+        };
+
+        function applyLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.textContent = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang][key]) el.placeholder = translations[lang][key];
+            });
+        }
+
+        function toggleLanguage() {
+            let currentLang = localStorage.getItem('tail_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+            let newLang = currentLang === 'tr' ? 'en' : 'tr';
+            localStorage.setItem('tail_lang', newLang);
+            applyLanguage(newLang);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let savedLang = localStorage.getItem('tail_lang');
+            if (!savedLang) {
+                savedLang = navigator.language.startsWith('tr') ? 'tr' : 'en';
+                localStorage.setItem('tail_lang', savedLang);
+            }
+            applyLanguage(savedLang);
+        });
+    </script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-[#09090b] flex items-center justify-center min-h-screen antialiased selection:bg-zinc-800 selection:text-white relative">
+
+    <!-- DİL SEÇİM BUTONU -->
+    <div class="absolute top-6 right-6">
+        <button onclick="toggleLanguage()" class="text-zinc-500 hover:text-zinc-300 text-xs font-semibold flex items-center gap-2 transition-colors bg-[#121214] px-3 py-1.5 rounded-lg border border-zinc-800/80">
+            <i class="fa-solid fa-language text-sm"></i> <span data-i18n="lang_btn">TR</span>
+        </button>
+    </div>
+
+    <div class="w-full max-w-[340px] px-4">
+        
+        <!-- Logo ve Başlık -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-12 h-12 bg-[#121214] border border-zinc-800 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-black/50">
+                <i class="fa-solid fa-cloud text-zinc-100 text-lg"></i>
+            </div>
+            <h1 class="text-xl font-semibold text-zinc-100 tracking-tight" data-i18n="login_title">HomeDrive'a Giriş Yap</h1>
+            <p class="text-[13px] text-zinc-500 mt-1.5" data-i18n="login_desc">Ağ erişimi için kimliğinizi doğrulayın</p>
+        </div>
+
+        <!-- Bildirimler (Backend Flash Message) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mb-5 p-3 rounded-lg text-xs flex items-center gap-2 border 
+                {% if category == 'error' %} bg-red-950/30 text-red-400 border-red-900/50 
+                {% else %} bg-emerald-950/30 text-emerald-400 border-emerald-900/50 {% endif %}">
+                  <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                <span data-i18n="{{ message }}">{{ message }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Giriş Formu -->
+        <div class="bg-[#121214] border border-zinc-800/80 p-5 rounded-2xl shadow-2xl shadow-black">
+            <form action="/login" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label class="block text-zinc-400 text-xs font-medium mb-1.5" data-i18n="username">Kullanıcı Adı</label>
+                    <input type="text" name="username" required autocomplete="off" data-i18n-placeholder="username"
+                        class="w-full bg-[#09090b] border border-zinc-800 text-zinc-200 text-sm rounded-lg px-3 py-2.5 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 outline-none transition-all placeholder-zinc-700" 
+                        placeholder="Kullanıcı Adı">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-400 text-xs font-medium mb-1.5" data-i18n="password">Parola</label>
+                    <input type="password" name="password" required data-i18n-placeholder="password"
+                        class="w-full bg-[#09090b] border border-zinc-800 text-zinc-200 text-sm rounded-lg px-3 py-2.5 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 outline-none transition-all placeholder-zinc-700" 
+                        placeholder="Parola">
+                </div>
+
+                <div class="flex items-center pt-2 pb-2">
+                    <input id="remember" type="checkbox" name="remember" class="w-3.5 h-3.5 bg-[#09090b] border-zinc-800 rounded accent-zinc-200 cursor-pointer">
+                    <label for="remember" class="ml-2 text-xs font-medium text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors" data-i18n="remember_me">
+                        Oturumu açık tut
+                    </label>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-lg text-sm px-4 py-2.5 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]" data-i18n="login_btn">
+                    Giriş Yap
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

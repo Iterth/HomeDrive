@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeDrive | Sistem Yönetimi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+        
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+
+        const translations = {
+            'tr': {
+                'cloud_drive': 'Bulut Sürücüsü', 'my_files': 'Dosyalarım', 'public_space': 'Ortak Alan', 'system': 'Sistem',
+                'admin_panel': 'Yönetim Paneli', 'theme': 'Tema', 'logout': 'Oturumu Kapat',
+                'lang_btn': 'Dil: TR', 'user_management': 'Kullanıcı Yönetimi',
+                'new_identity': 'Yeni Kimlik Tanımla', 'username': 'Kullanıcı Adı',
+                'password': 'Parola', 'admin_auth': 'Yönetici Yetkisi', 'create': 'Oluştur',
+                'active_users': 'Aktif Kullanıcılar', 'total': 'Toplam', 'user_info': 'Kullanıcı Bilgisi',
+                'role': 'Yetki', 'storage': 'Depolama', 'actions': 'İşlemler', 'host_role': 'Kurucu', 'admin_role': 'Yönetici', 'standard_role': 'Standart',
+                'demote': 'İndirgen', 'promote': 'Yükselt', 'delete': 'Sil',
+                'confirm_user_delete': 'Kalıcı olarak silmek istediğinize emin misiniz?',
+                'change_privilege_self': 'Kendi yetkinizi değiştiremezsiniz!',
+                'change_privilege_last': 'Sistemdeki son yöneticinin yetkisini değiştiremezsiniz!',
+                'delete_last_admin': 'Sistemdeki son yöneticiyi silemezsiniz!',
+                'delete_admin_self': 'Kendi hesabınızı silemezsiniz!',
+                'system_storage': 'Sistem Depolama', 'used': 'Kullanılan', 'free': 'Boş',
+                'set': 'Ayarla', 'limit_locked': 'Limit değiştirilemez',
+                'your_account': 'Sizin Hesabınız', 'host_account': 'Kurucu Hesap',
+                'recent': 'Son Eklenenler', 'favorites': 'Yıldızlılar', 'view_files': 'Gözat', 'user_not_found': 'Kullanıcı klasörü bulunamadı.'
+            },
+            'en': {
+                'cloud_drive': 'Cloud Drive', 'my_files': 'My Files', 'public_space': 'Public Space', 'system': 'System',
+                'admin_panel': 'Admin Panel', 'theme': 'Theme', 'logout': 'Log Out',
+                'lang_btn': 'Lang: EN', 'user_management': 'User Management',
+                'new_identity': 'Define New Identity', 'username': 'Username',
+                'password': 'Password', 'admin_auth': 'Admin Privilege', 'create': 'Create',
+                'active_users': 'Active Users', 'total': 'Total', 'user_info': 'User Info',
+                'role': 'Role', 'storage': 'Storage', 'actions': 'Actions','host_role': 'Host' , 'admin_role': 'Admin', 'standard_role': 'Standard',
+                'demote': 'Demote', 'promote': 'Promote', 'delete': 'Delete',
+                'confirm_user_delete': 'Are you sure you want to permanently delete this user?',
+                'change_privilege_self': 'You cannot change your own privilege!',
+                'change_privilege_last': 'You cannot change the privilege of the last admin!',
+                'delete_last_admin': 'You cannot delete the last admin in the system!',
+                'delete_admin_self': 'You cannot delete your own account!',
+                'system_storage': 'System Storage', 'used': 'Used', 'free': 'Free',
+                'set': 'Set', 'limit_locked': 'Limit cannot be changed',
+                'your_account': 'Your Account', 'host_account': 'Host Account',
+                'recent': 'Recent', 'favorites': 'Favorites', 'view_files': 'Browse', 'user_not_found': 'User directory not found.'
+            }
+        };
+
+        function applyLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.textContent = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[lang][key]) el.title = translations[lang][key];
+            });
+        }
+
+        function toggleLanguage() {
+            let currentLang = localStorage.getItem('tail_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+            let newLang = currentLang === 'tr' ? 'en' : 'tr';
+            localStorage.setItem('tail_lang', newLang);
+            applyLanguage(newLang);
+        }
+
+        function confirmAction(key) {
+            let lang = localStorage.getItem('tail_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+            return confirm(translations[lang][key]);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let savedLang = localStorage.getItem('tail_lang');
+            if (!savedLang) {
+                savedLang = navigator.language.startsWith('tr') ? 'tr' : 'en';
+                localStorage.setItem('tail_lang', savedLang);
+            }
+            applyLanguage(savedLang);
+        });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-[#000000] text-slate-800 dark:text-zinc-300 h-screen w-full flex overflow-hidden antialiased p-0 md:p-2 gap-2 transition-colors duration-300">
+
+    <aside class="w-64 flex-shrink-0 flex flex-col bg-white dark:bg-[#0c0c0e] hidden md:flex rounded-xl border border-slate-200 dark:border-zinc-800/80 shadow-sm transition-colors duration-300">
+        <div class="h-16 flex items-center px-6 mb-2 mt-2">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-zinc-800 flex items-center justify-center border border-blue-100 dark:border-zinc-700/50 shadow-inner">
+                    <i class="fa-solid fa-cloud text-blue-600 dark:text-zinc-200 text-sm"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-zinc-100">HomeDrive</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-3 space-y-1 mt-6">
+            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2" data-i18n="cloud_drive">Bulut Sürücüsü</p>
+            
+            <a href="/" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-regular fa-hard-drive w-4 text-center"></i> <span data-i18n="my_files">Dosyalarım</span>
+            </a>
+
+            <a href="/public" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-solid fa-users w-4 text-center"></i> <span data-i18n="public_space">Ortak Alan</span>
+            </a>
+            
+            <a href="/recent" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-regular fa-clock w-4 text-center"></i> <span data-i18n="recent">Son Eklenenler</span>
+            </a>
+
+            <a href="/favorites" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-regular fa-star w-4 text-center"></i> <span data-i18n="favorites">Yıldızlılar</span>
+            </a>
+            
+            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2 mt-6" data-i18n="system">Sistem</p>
+            <a href="/admin" class="flex items-center gap-3 px-3 py-2 bg-blue-50 dark:bg-zinc-800/50 text-blue-700 dark:text-zinc-100 rounded-lg font-medium text-sm border border-blue-100 dark:border-zinc-700/50 transition-colors">
+                <i class="fa-solid fa-shield-halved w-4 text-center text-blue-600 dark:text-zinc-500"></i> <span data-i18n="admin_panel">Yönetim Paneli</span>
+            </a>
+        </nav>
+
+        <div class="p-4 mt-auto space-y-2">
+            <button onclick="toggleLanguage()" class="w-full flex items-center justify-between px-3 py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-lg font-medium text-sm transition-colors">
+                <div class="flex items-center gap-3"><i class="fa-solid fa-language w-4 text-center"></i> <span data-i18n="lang_btn">Dil: TR</span></div>
+            </button>
+            <button onclick="toggleTheme()" class="w-full flex items-center justify-between px-3 py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-lg font-medium text-sm transition-colors">
+                <div class="flex items-center gap-3"><i class="fa-solid fa-moon dark:fa-sun w-4 text-center"></i> <span data-i18n="theme">Tema</span></div>
+            </button>
+            <a href="/logout" class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> <span data-i18n="logout">Oturumu Kapat</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col bg-white dark:bg-[#0c0c0e] rounded-xl border border-slate-200 dark:border-zinc-800/80 shadow-md overflow-hidden relative transition-colors duration-300">
+        
+        <header class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-zinc-800/80 bg-white/80 dark:bg-[#0c0c0e]/80 backdrop-blur-sm z-10 sticky top-0 transition-colors duration-300">
+            <div class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-zinc-100">
+                <span class="text-slate-400 dark:text-zinc-400" data-i18n="system">Sistem</span>
+                <span class="text-slate-300 dark:text-zinc-600">/</span>
+                <span data-i18n="user_management">Kullanıcı Yönetimi</span>
+            </div>
+            <div class="flex items-center gap-3 select-none">
+                    <div class="flex flex-col items-end hidden sm:flex">
+                        <span class="text-xs font-bold text-slate-700 dark:text-zinc-200">{{ session.get('username', 'Kullanıcı') }}</span>
+                        <span class="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                            {% if session.get('role') == 2 %}Kurucu{% elif session.get('role') == 1 %}Yönetici{% else %}Standart{% endif %}
+                        </span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20 border border-slate-100 dark:border-zinc-800 ring-2 ring-white dark:ring-[#0c0c0e]">
+                        {{ session.get('username', 'K')[0]|upper }}
+                    </div>
+                </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="space-y-2 mb-6">
+                        {% for category, message in messages %}
+                            <div class="p-3 rounded-lg text-xs flex items-center gap-2 border 
+                                {% if category == 'error' %} bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 
+                                {% elif category == 'success' %} bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 
+                                {% else %} bg-slate-50 dark:bg-zinc-800/30 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-zinc-700/50 {% endif %} transition-colors">
+                                <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                                <span data-i18n="{{ message }}">{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <section class="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-5 mb-8 shadow-sm transition-colors">
+                <h2 class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-4 flex items-center gap-2" data-i18n="new_identity">
+                    Yeni Kimlik Tanımla
+                </h2>
+                <form action="/admin/add_user" method="POST" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5" data-i18n="username">Kullanıcı Adı</label>
+                        <input type="text" name="username" required autocomplete="off"
+                            class="w-full bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-zinc-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-zinc-500 transition-all placeholder-slate-400 dark:placeholder-zinc-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5" data-i18n="password">Parola</label>
+                        <input type="password" name="password" required
+                            class="w-full bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-zinc-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-zinc-500 transition-all placeholder-slate-400 dark:placeholder-zinc-700">
+                    </div>
+                    {% if session["role"] == 2 %}
+                    <div class="flex items-center h-[38px] gap-2 px-3 bg-slate-50 dark:bg-[#121214] border border-slate-200 dark:border-zinc-800 rounded-lg transition-colors">
+                        <input type="checkbox" name="is_admin" id="new_is_admin" value="1" class="w-3.5 h-3.5 accent-blue-600 dark:accent-zinc-300 cursor-pointer bg-white dark:bg-[#09090b]">
+                        <label for="new_is_admin" class="text-xs font-semibold text-slate-600 dark:text-zinc-400 cursor-pointer select-none" data-i18n="admin_auth">Yönetici Yetkisi</label>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <button type="submit" class="w-full bg-slate-900 dark:bg-zinc-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-sm h-[38px] rounded-lg transition-all shadow-md dark:shadow-[0_0_15px_rgba(255,255,255,0.05)]" data-i18n="create">
+                            Oluştur
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            {% if disk_info %}
+            <section class="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-5 mb-4 shadow-sm transition-colors">
+                <h2 class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-3" data-i18n="system_storage">Sistem Depolama</h2>
+                <div class="flex gap-6 text-xs">
+                    <div>
+                        <span class="text-slate-400 dark:text-zinc-500" data-i18n="total">Toplam</span>
+                        <p class="font-bold text-slate-700 dark:text-zinc-200 mt-0.5">{{ disk_info.total }}</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 dark:text-zinc-500" data-i18n="used">Kullanılan</span>
+                        <p class="font-bold text-slate-700 dark:text-zinc-200 mt-0.5">{{ disk_info.used }}</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 dark:text-zinc-500" data-i18n="free">Boş</span>
+                        <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ disk_info.free }}</p>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-zinc-800/80 rounded-xl overflow-hidden shadow-sm transition-colors">
+                <div class="p-4 border-b border-slate-200 dark:border-zinc-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-[#121214]/50 transition-colors">
+                    <h2 class="text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider" data-i18n="active_users">Aktif Kullanıcılar</h2>
+                    <span class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400"><span data-i18n="total">Toplam</span>: {{ users|length }}</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50/80 dark:bg-[#121214]/30 border-b border-slate-200 dark:border-zinc-800/80 transition-colors">
+                            <tr>
+                                <th class="py-3 px-5 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider" data-i18n="user_info">Kullanıcı Bilgisi</th>
+                                <th class="py-3 px-5 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider text-center" data-i18n="role">Yetki</th>
+                                <th class="py-3 px-5 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider" data-i18n="storage">Depolama</th>
+                                <th class="py-3 px-5 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider text-right" data-i18n="actions">İşlemler</th>    
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-zinc-800/50 transition-colors">
+                            {% for user in users %}
+                            {% set username = user.username if user.username else user['username'] %}
+                            {% set u_role = user.role if user.role is defined else user.get('role', 'user') %}
+                            <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/20 transition-colors">
+                                <td class="py-3 px-5 font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded bg-slate-100 dark:bg-[#121214] border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-500 dark:text-zinc-500 text-xs transition-colors">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    {{ username }}
+                                </td>
+                                <td class="py-3 px-5 text-center">
+                                    {% if u_role == 'host' or u_role == 2 %}
+                                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 transition-colors" data-i18n="host_role">Kurucu</span>
+                                    {% elif u_role == 'admin' or u_role == 1 %}
+                                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 transition-colors" data-i18n="admin_role">Yönetici</span>
+                                    {% else %}
+                                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700/80 transition-colors" data-i18n="standard_role">Standart</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-5 min-w-[180px]">
+                                    {% if user.storage_used_str is defined %}
+                                    <div class="flex justify-between text-[10px] text-slate-500 dark:text-zinc-500 mb-1">
+                                        <span>{{ user.storage_used_str }}</span>
+                                        <span>{{ user.storage_limit_str }}</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-1 mb-2">
+                                        <div class="h-1 rounded-full 
+                                            {% if user.storage_percent > 90 %}bg-red-500
+                                            {% elif user.storage_percent > 70 %}bg-amber-500
+                                            {% else %}bg-blue-500 dark:bg-zinc-400{% endif %}"
+                                            style="width: {{ user.storage_percent }}%">
+                                        </div>
+                                    </div>
+                                    
+                                    {% if u_role != 'host' and u_role != 2 or session['username'] == username or session['role'] == 2 %}
+                                    <form action="/admin/set_limit/{{ username }}" method="POST" class="flex items-center gap-1">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="number" name="limit_gb" step="0.1" min="0.1"
+                                               value="{{ (user.storage_limit / 1073741824) | round(1) }}"
+                                               class="w-16 text-[10px] bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded px-1.5 py-0.5 text-slate-700 dark:text-zinc-300 focus:outline-none transition-colors">
+                                        <span class="text-[10px] text-slate-400">GB</span>
+                                        <button type="submit" class="text-[10px] px-2 py-0.5 bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded font-semibold transition-all" data-i18n="set">
+                                            Ayarla
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <div class="text-[10px] text-slate-400 dark:text-zinc-600 italic mt-1.5 flex items-center gap-1">
+                                        <i class="fa-solid fa-lock text-[9px]"></i> <span data-i18n="limit_locked">Limit değiştirilemez</span>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-5 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        {% if username != session['username'] and (u_role != 2 or session['role'] == 2) %}
+                                        <a href="/admin/view_user/{{ username }}" class="text-[11px] font-semibold px-2.5 py-1.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-600 transition-colors flex items-center gap-1.5" title="Dosyaları Gör">
+                                            <i class="fa-regular fa-folder-open"></i> <span data-i18n="view_files">Gözat</span>
+                                        </a>
+                                        {% endif %}
+
+                                        {% if session['role'] == 2 and username != session["username"] %}
+                                        <form action="/admin/toggle_admin/{{ username }}" method="POST" class="inline m-0 p-0">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="text-[11px] font-semibold px-2.5 py-1.5 rounded border transition-colors 
+                                                {% if u_role == 1 or u_role == 'admin' %} bg-white dark:bg-[#121214] text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-200
+                                                {% else %} bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent hover:bg-slate-800 dark:hover:bg-white shadow-sm {% endif %}">
+                                                {% if u_role == 1 or u_role == 'admin' %} <span data-i18n="demote">İndirgen</span> {% else %} <span data-i18n="promote">Yükselt</span> {% endif %}
+                                            </button>
+                                        </form>
+                                        {% endif %}
+
+                                        {% if username == session['username'] %}
+                                            <span class="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 select-none flex items-center gap-1.5 ml-1">
+                                                <i class="fa-solid fa-user-check text-[10px]"></i> <span data-i18n="your_account">Sizin Hesabınız</span>
+                                            </span>
+                                        {% elif u_role == 2 or u_role == 'host' %}
+                                            <span class="text-[10px] font-semibold text-slate-400 dark:text-zinc-600 select-none flex items-center gap-1.5 ml-1">
+                                                <i class="fa-solid fa-shield text-[10px]"></i> <span data-i18n="host_account">Kurucu Hesap</span>
+                                            </span>
+                                        {% else %}
+                                        {% if u_role == 0 or u_role == 'user' %}
+                                        <form action="/admin/delete_user/{{ username }}" method="POST" class="inline m-0 p-0" onsubmit="return confirmAction('confirm_user_delete');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="text-[11px] font-semibold px-2.5 py-1.5 rounded bg-white dark:bg-[#121214] text-red-500 dark:text-red-400 border border-red-200 dark:border-red-950/50 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" data-i18n="delete">
+                                                Sil
+                                            </button>
+                                        </form>
+                                        {% elif session['role'] == 2 and u_role == 1 or u_role == 'admin' %}
+                                        <form action="/admin/delete_user/{{ username }}" method="POST" class="inline m-0 p-0" onsubmit="return confirmAction('confirm_user_delete');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="text-[11px] font-semibold px-2.5 py-1.5 rounded bg-white dark:bg-[#121214] text-red-500 dark:text-red-400 border border-red-200 dark:border-red-950/50 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" data-i18n="delete">
+                                                Sil
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</body>
+</html>

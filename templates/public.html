@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeDrive | Ortak Alan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+        
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+
+        const translations = {
+            'tr': {
+                'cloud_drive': 'Bulut Sürücüsü', 'my_files': 'Dosyalarım', 'recent': 'Son Eklenenler',
+                'favorites': 'Yıldızlılar', 'public_space': 'Ortak Alan', 'system': 'Sistem', 'admin_panel': 'Yönetim Paneli',
+                'theme': 'Tema', 'logout': 'Oturumu Kapat', 'new_upload': 'Yeni Yükle',
+                'uploading': 'Yükleniyor...', 'new_folder': 'Yeni Klasör', 'home_dir': 'Ana Dizin',
+                'folders': 'Klasörler', 'files': 'Dosyalar', 'empty_dir': 'Dizin boş görünüyor',
+                'name': 'Ad', 'size': 'Boyut', 'actions': 'İşlemler',
+                'confirm_delete': 'Kalıcı olarak silinecek, emin misiniz?', 'lang_btn': 'Dil: TR',
+                'download_zip': 'ZIP İndir', 'favorite': 'Favori', 'open': 'Aç', 'download': 'İndir', 'delete': 'Sil',
+                'remove_favorites': 'Dosya yıldızlılardan çıkarıldı.',
+                'add_favorites': 'Dosya yıldızlılara eklendi.',
+                'storage_full': 'Depolama alanı dolu, dosya yüklenemedi.'
+            },
+            'en': {
+                'cloud_drive': 'Cloud Drive', 'my_files': 'My Files', 'recent': 'Recent',
+                'favorites': 'Favorites', 'public_space': 'Public Space', 'system': 'System', 'admin_panel': 'Admin Panel',
+                'theme': 'Theme', 'logout': 'Log Out', 'new_upload': 'New Upload',
+                'uploading': 'Uploading...', 'new_folder': 'New Folder', 'home_dir': 'Home Directory',
+                'folders': 'Folders', 'files': 'Files', 'empty_dir': 'Directory looks empty',
+                'name': 'Name', 'size': 'Size', 'actions': 'Actions',
+                'confirm_delete': 'Are you sure you want to permanently delete this?', 'lang_btn': 'Lang: EN',
+                'download_zip': 'Download ZIP', 'favorite': 'Favorite', 'open': 'Open', 'download': 'Download', 'delete': 'Delete',
+                'remove_favorites': 'File removed from favorites.',
+                'add_favorites': 'File added to favorites.',
+                'storage_full': 'Storage limit reached, file could not be uploaded.'
+            }
+        };
+
+        function applyLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.textContent = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang][key]) el.placeholder = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[lang][key]) el.title = translations[lang][key];
+            });
+        }
+
+        function toggleLanguage() {
+            let currentLang = localStorage.getItem('tail_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+            let newLang = currentLang === 'tr' ? 'en' : 'tr';
+            localStorage.setItem('tail_lang', newLang);
+            applyLanguage(newLang);
+        }
+
+        function confirmAction(key) {
+            let lang = localStorage.getItem('tail_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+            return confirm(translations[lang][key]);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let savedLang = localStorage.getItem('tail_lang');
+            if (!savedLang) {
+                savedLang = navigator.language.startsWith('tr') ? 'tr' : 'en';
+                localStorage.setItem('tail_lang', savedLang);
+            }
+            applyLanguage(savedLang);
+        });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-[#000000] text-slate-800 dark:text-zinc-300 h-screen w-full flex overflow-hidden antialiased p-0 md:p-2 gap-2 transition-colors duration-300">
+
+    <aside class="w-64 flex-shrink-0 flex flex-col bg-white dark:bg-[#0c0c0e] hidden md:flex rounded-xl border border-slate-200 dark:border-zinc-800/80 shadow-sm transition-colors duration-300">
+        
+        <div class="h-16 flex items-center px-6 mb-2 mt-2">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-zinc-800 flex items-center justify-center border border-blue-100 dark:border-zinc-700/50 shadow-inner">
+                    <i class="fa-solid fa-cloud text-blue-600 dark:text-zinc-200 text-sm"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-zinc-100">HomeDrive</span>
+            </div>
+        </div>
+
+        {% if session.get('role') in [1, 2] %}
+        <div class="px-4 mb-6">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" class="hidden" id="fileInput">
+                <input type="hidden" name="subpath" value="{{ subpath }}" id="subpathInput">
+                <button type="button" onclick="document.getElementById('fileInput').click()" 
+                class="w-full bg-blue-600 hover:bg-blue-500 dark:bg-zinc-800 dark:hover:bg-zinc-700 
+                       text-white dark:text-zinc-100 font-semibold py-2.5 px-4 rounded-xl 
+                       flex items-center justify-center gap-2 transition-all shadow-md border 
+                       border-transparent dark:border-zinc-700/50">
+                    <i class="fa-solid fa-plus text-sm"></i> <span data-i18n="new_upload">Yeni Yükle</span>
+                </button>
+            </form>
+
+            <div id="progressContainer" class="hidden mt-3 px-1">
+                <div class="flex justify-between text-xs text-slate-500 dark:text-zinc-400 mb-1">
+                    <span id="progressFileName" class="truncate" data-i18n="uploading">Yükleniyor...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-1.5">
+                    <div id="progressBar" class="bg-blue-500 dark:bg-zinc-300 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <nav class="flex-1 px-3 space-y-1 mt-2">
+            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2 mt-2" data-i18n="cloud_drive">Bulut Sürücüsü</p>
+            
+            <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30 text-slate-600 dark:text-zinc-400">
+                <i class="fa-regular fa-hard-drive w-4 text-center"></i> <span data-i18n="my_files">Dosyalarım</span>
+            </a>
+
+            <a href="/public" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors bg-blue-50 dark:bg-zinc-800/50 text-blue-700 dark:text-zinc-100 border border-blue-100 dark:border-zinc-700/50">
+                <i class="fa-solid fa-users w-4 text-center"></i> <span data-i18n="public_space">Ortak Alan</span>
+            </a>
+            
+            <a href="/recent" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30 text-slate-600 dark:text-zinc-400">
+                <i class="fa-regular fa-clock w-4 text-center"></i> <span data-i18n="recent">Son Eklenenler</span>
+            </a>
+
+            <a href="/favorites" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30 text-slate-600 dark:text-zinc-400">
+                <i class="fa-regular fa-star w-4 text-center"></i> <span data-i18n="favorites">Yıldızlılar</span>
+            </a>
+
+            {% if session.get('is_admin') or session.get('role') in [1, 2] %}
+            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2 mt-6" data-i18n="system">Sistem</p>
+            <a href="/admin" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-solid fa-shield-halved w-4 text-center text-slate-400 dark:text-zinc-500"></i> <span data-i18n="admin_panel">Yönetim Paneli</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="p-4 mt-auto space-y-2">
+            <button onclick="toggleLanguage()" class="w-full flex items-center justify-between px-3 py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-lg font-medium text-sm transition-colors">
+                <div class="flex items-center gap-3"><i class="fa-solid fa-language w-4 text-center"></i> <span data-i18n="lang_btn">Dil: TR</span></div>
+            </button>
+            <button onclick="toggleTheme()" class="w-full flex items-center justify-between px-3 py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-lg font-medium text-sm transition-colors">
+                <div class="flex items-center gap-3"><i class="fa-solid fa-moon dark:fa-sun w-4 text-center"></i> <span data-i18n="theme">Tema</span></div>
+            </button>
+            <a href="/logout" class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg font-medium text-sm transition-colors">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> <span data-i18n="logout">Oturumu Kapat</span>
+            </a>
+
+            <div class="px-3 mb-2 mt-2">
+                <div class="flex justify-between text-[10px] text-slate-400 dark:text-zinc-500 mb-1">
+                    <span>%{{ storage_percent }} | {{ storage_used_str }}</span>
+                    <span>{{ storage_limit_str }}</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-1 overflow-hidden">
+                    <div class="h-1 rounded-full {% if storage_percent > 90 %} bg-red-500 dark:bg-red-600 {% elif storage_percent > 70 %} bg-amber-500 dark:bg-amber-600 {% else %} bg-blue-500 dark:bg-zinc-400 {% endif %}" style="width: {{ storage_percent }}%"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col bg-white dark:bg-[#0c0c0e] rounded-xl border border-slate-200 dark:border-zinc-800/80 shadow-md overflow-hidden relative transition-colors duration-300">
+        
+        <header class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-zinc-800/80 bg-white/80 dark:bg-[#0c0c0e]/80 backdrop-blur-sm z-10 sticky top-0 transition-colors duration-300">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2 mb-4 absolute top-16 right-6 z-50">
+                {% for category, message in messages %}
+                    <div class="p-3 rounded-lg text-xs flex items-center gap-2 border shadow-lg
+                    {% if category == 'error' %} bg-red-50 dark:bg-red-950/90 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 
+                    {% elif category == 'success' %} bg-emerald-50 dark:bg-emerald-950/90 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 
+                    {% else %} bg-slate-50 dark:bg-zinc-800/90 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-zinc-700/50 {% endif %}">
+                    <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                    <span data-i18n="{{ message }}">{{ message }}</span>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+            <div class="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-zinc-100">
+                <span class="text-blue-600 dark:text-zinc-200" data-i18n="public_space">Ortak Alan</span>
+                {% if subpath %}
+                    <span class="text-slate-300 dark:text-zinc-600">/</span>
+                    <span>{{ subpath.split('/')[-1] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center gap-4">
+                {% if session.get('role') in [1, 2] %}
+                <form action="/add_public_dir" method="POST" class="hidden sm:flex items-center gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="subpath" value="{{ subpath }}">
+                    <input type="text" name="folder_name" data-i18n-placeholder="new_folder" placeholder="Yeni Klasör" required class="text-xs border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500 dark:focus:border-zinc-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-zinc-500 w-32 md:w-40 transition-all placeholder-slate-400 dark:placeholder-zinc-600">
+                    <button type="submit" class="bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-transparent px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm"><i class="fa-solid fa-folder-plus"></i></button>
+                </form>
+                <div class="h-5 w-px bg-slate-200 dark:bg-zinc-800 hidden sm:block"></div>
+                {% endif %}
+                <div class="flex items-center gap-3 select-none">
+                    <div class="flex flex-col items-end hidden sm:flex">
+                        <span class="text-xs font-bold text-slate-700 dark:text-zinc-200">{{ session.get('username', 'Kullanıcı') }}</span>
+                        <span class="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                            {% if session.get('role') == 2 %}Kurucu{% elif session.get('role') == 1 %}Yönetici{% else %}Standart{% endif %}
+                        </span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20 border border-slate-100 dark:border-zinc-800 ring-2 ring-white dark:ring-[#0c0c0e]">
+                        {{ session.get('username', 'K')[0]|upper }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            {% if not folders and not files %}
+            <div class="h-full min-h-[50vh] flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 select-none">
+                <div class="w-20 h-20 mb-5 bg-slate-50 dark:bg-[#09090b] rounded-2xl flex items-center justify-center border border-slate-200 dark:border-zinc-800/50 shadow-sm dark:shadow-inner">
+                    <i class="fa-regular fa-folder-open text-3xl text-slate-300 dark:text-zinc-600"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-600 dark:text-zinc-300 mb-1" data-i18n="empty_dir">Dizin boş görünüyor</h3>
+            </div>
+            {% endif %}
+
+            {% if folders %}
+            <div class="mb-8">
+                <h3 class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-4 pl-1" data-i18n="folders">Klasörler</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {% for folder in folders %}
+                <div class="group flex items-center justify-between bg-white dark:bg-[#09090b] border border-slate-200 dark:border-zinc-800/80 hover:border-blue-300 dark:hover:border-zinc-700 rounded-xl p-2.5 transition-all shadow-sm cursor-pointer">
+                    <a href="/public/browse/{{ (subpath + '/') if subpath else '' }}{{ folder }}" class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <i class="fa-solid fa-folder text-blue-500 dark:text-zinc-500 text-base"></i>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">{{ folder }}</span>
+                    </a>
+                    
+                    <!-- YENİ EKLENEN KLASÖR İNDİRME BUTONU -->
+                    <a href="/download_public_dir/{{ (subpath + '/') if subpath else '' }}{{ folder }}" 
+                    class="opacity-0 group-hover:opacity-100 text-slate-400 dark:text-zinc-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all p-1" 
+                    data-i18n-title="download_zip" title="ZIP İndir">
+                        <i class="fa-solid fa-download text-xs"></i>
+                    </a>
+                    
+                    {% if session.get('role') in [1, 2] %}
+                    <form action="/delete_public_dir/{{ folder }}" method="POST" class="inline" onsubmit="return confirmAction('confirm_delete');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="subpath" value="{{ subpath }}">
+                        <button type="submit" class="opacity-0 group-hover:opacity-100 text-slate-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 transition-all p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if files %}
+            <div>
+                <h3 class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-4 pl-1" data-i18n="files">Dosyalar</h3>
+                <div class="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead class="bg-slate-50 dark:bg-[#121214]/50 border-b border-slate-200 dark:border-zinc-800/80 transition-colors">
+                            <tr>
+                                <th class="px-5 py-3 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider w-full" data-i18n="name">Ad</th>
+                                <th class="px-5 py-3 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider w-32 hidden sm:table-cell" data-i18n="size">Boyut</th>
+                                <th class="px-5 py-3 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider text-right w-40" data-i18n="actions">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-zinc-800/50 transition-colors">
+                            {% for file in files %}
+                            {% set ext = file.name.split('.')[-1]|lower %}
+                            {% set file_path = 'public/' + (subpath + '/' + file.name if subpath else file.name) %}
+                            
+                            <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/20 group transition-colors">
+                                <td class="px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded bg-slate-100 dark:bg-[#121214] border border-slate-200 dark:border-zinc-800 flex items-center justify-center shrink-0 text-slate-500 dark:text-zinc-400 transition-colors">
+                                        {% if ext in ['png', 'jpg', 'jpeg', 'gif'] %} <i class="fa-solid fa-image text-xs text-emerald-500"></i>
+                                        {% elif ext in ['mp4', 'mov', 'avi'] %} <i class="fa-solid fa-circle-play text-xs text-purple-500"></i>
+                                        {% elif ext == 'pdf' %} <i class="fa-solid fa-file-pdf text-xs text-rose-500"></i>
+                                        {% elif ext in ['zip', 'rar', 'tar', 'gz'] %} <i class="fa-solid fa-file-zipper text-xs text-amber-500"></i>
+                                        {% else %} <i class="fa-solid fa-file-lines text-xs text-blue-500 dark:text-zinc-400"></i> {% endif %}
+                                    </div>
+                                    <span class="text-sm font-semibold text-slate-700 dark:text-zinc-300 truncate max-w-[150px] sm:max-w-xs md:max-w-md lg:max-w-xl transition-colors">{{ file.name }}</span>
+                                </td>
+                                
+                                <td class="px-5 py-3 text-xs font-medium text-slate-500 dark:text-zinc-500 hidden sm:table-cell transition-colors">{{ file.size }}</td>
+                                
+                                <td class="px-5 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                        
+                                        <a href="/shared_files/{{ file_path }}" target="_blank" class="w-7 h-7 rounded hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-zinc-200 transition-colors" data-i18n-title="open" title="Aç">
+                                            <i class="fa-solid fa-eye text-xs"></i>
+                                        </a>
+                                        <a href="/shared_files/{{ file_path }}?download=1" class="w-7 h-7 rounded hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-zinc-200 transition-colors" data-i18n-title="download" title="İndir">
+                                            <i class="fa-solid fa-download text-xs"></i>
+                                        </a>
+                                        
+                                        {% if session.get('role') in [1, 2] %}
+                                        <form action="/delete_public_file/{{ file.name }}" method="POST" class="inline m-0 p-0" onsubmit="return confirmAction('confirm_delete');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="subpath" value="{{ subpath }}">
+                                            <button type="submit" class="w-7 h-7 rounded hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-500 dark:hover:text-red-400 flex items-center justify-center text-slate-400 dark:text-zinc-400 transition-colors" data-i18n-title="delete" title="Sil">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+    <script>
+    document.getElementById('fileInput')?.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('subpath', document.getElementById('subpathInput').value);
+        formData.append('csrf_token', '{{ csrf_token() }}');
+
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressFileName = document.getElementById('progressFileName');
+
+        progressContainer.classList.remove('hidden');
+        progressFileName.textContent = file.name;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload_public_file');
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + '%';
+                progressPercent.textContent = percent + '%';
+            }
+        };
+
+        xhr.onload = function() {
+        if (xhr.status === 413) {
+            const response = JSON.parse(xhr.responseText);
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+
+            let currentLang = document.documentElement.lang || 'tr';
+            let translatedMessage = translations[currentLang][response.error] || response.error;
+
+            alert(translatedMessage);
+            document.getElementById('fileInput').value = '';
+            
+        } else if (xhr.status === 200) {
+            window.location.reload();
+        }
+    };
+        xhr.send(formData);
+    });
+    </script>
+</body>
+</html>
