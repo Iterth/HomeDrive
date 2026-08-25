@@ -24,7 +24,7 @@ Security is a primary focus of this project. The architecture includes specific 
 Follow these steps to deploy HomeDrive on your local machine or server.
 
 **1. Clone the repository:**
-git clone [https://github.com/YOUR_USERNAME/HomeDrive.git](https://github.com/Iterth/HomeDrive.git)
+git clone [https://github.com/Iterth/HomeDrive.git](https://github.com/Iterth/HomeDrive.git)
 cd HomeDrive
 
 **2. Install required dependencies:**
