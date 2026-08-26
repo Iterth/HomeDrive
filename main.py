@@ -405,7 +405,7 @@ def admin_handle_file(target_user, name):
 @app.route("/admin/delete/<target_user>/<path:name>", methods=['POST'])
 @admin_required
 def admin_delete_file(target_user, name):
-    delete_file("admin", name, target_user)
+    return delete_file("admin", name, target_user)
 
 @app.route("/admin/delete_dir/<target_user>/<path:name>", methods=['POST'])
 @admin_required
